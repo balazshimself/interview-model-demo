@@ -15,20 +15,20 @@ df = pd.read_excel('SEERA_dataset.xlsx')
 
 # Define all parameters in a single dictionary with their configurations
 all_parameters = {
-    'Dedicated team members': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Team size': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Object points': {"min_value": 0, "step": 1, "format": "%.0f"},
+    'Dedicated team members': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Team size': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Object points': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
     'Actual duration': {"min_value": 0.0, "step": 0.5, "format": "%.1f"},
     'Estimated duration': {"min_value": 0.0, "step": 0.5, "format": "%.1f"},
-    'Degree of risk management': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Economic instability impact': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Development environment adequacy': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Estimated size': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Other sizing method': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Comments within the code': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Application domain': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Income satisfaction': {"min_value": 0, "step": 1, "format": "%.0f"},
-    'Top management opinion of previous system': {"min_value": 0, "max_value": 1, "step": 1, "format": "%.0f"},
+    'Degree of risk management': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Economic instability impact': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Development environment adequacy': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Estimated size': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Other sizing method': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Comments within the code': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Application domain': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Income satisfaction': {"min_value": 0.0, "step": 1.0, "format": "%.0f"},
+    'Top management opinion of previous system': {"min_value": 0.0, "max_value": 1.0, "step": 1.0, "format": "%.0f"},
     'Requirement stability': {"min_value": 0.0, "step": 0.01, "format": "%.2f"}
 }
 
@@ -44,7 +44,7 @@ def log_prediction(inputs, prediction):
 # Dummy prediction function – replace with your model's prediction code.
 def predict_cost(features):
     # For demonstration, simply sum all numeric values
-    total = 0
+    total = 0.0
     for v in features.values():
         total += float(v)
     return total
@@ -59,7 +59,7 @@ def update_inputs_from_actual_data(inputs, actual_data):
     for key, value in actual_data.items():
         if pd.notnull(value):
             try:
-                new_val = float(value)
+                new_val = float(value)  # Ensure the value is a float
             except (ValueError, TypeError):
                 continue
             # Update the inputs dictionary and session state
@@ -80,11 +80,11 @@ inputs = {}
 for param, config in all_parameters.items():
     inputs[param] = st.number_input(
         param,
-        min_value=config["min_value"],
-        max_value=config.get("max_value", None),  # Use max_value if specified
-        step=config["step"],
+        min_value=float(config["min_value"]),  # Ensure min_value is a float
+        max_value=float(config.get("max_value", float("inf"))),  # Ensure max_value is a float
+        step=float(config["step"]),  # Ensure step is a float
         format=config["format"],
-        value=st.session_state.inputs.get(param, config["min_value"])
+        value=float(st.session_state.inputs.get(param, config["min_value"]))  # Ensure value is a float
     )
 
 # Create a container for displaying the updated JSON.
