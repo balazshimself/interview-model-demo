@@ -125,7 +125,7 @@ if st.button("Evaluate Model"):
     st.write("### Prediction:", prediction)
 
     # Store the prediction in session state
-    st.session_state.prediction = prediction
+    st.session_state.prediction = float(prediction)
     st.session_state.show_results = True  # Show the numeric field and submit button
     st.session_state.submitted = False  # Reset submission status
 
