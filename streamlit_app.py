@@ -144,6 +144,14 @@ if st.session_state.show_results:
     else:
         if st.button("Submit Results"):
             if "prediction" in st.session_state and "actual_result" in st.session_state:
+                if not isinstance(inputs, dict):
+                    st.error("Inputs must be a dictionary.")
+                # Ensure prediction is a numeric value
+                if not isinstance(st.session_state.prediction, (int, float)):
+                    st.error("Prediction must be a numeric value.")
+                # Ensure actual_result is a numeric value
+                if not isinstance(st.session_state.actual_result, (int, float)):
+                    st.error("Actual result must be a numeric value.")
                 # Log the prediction and actual result to Firestore
                 log_prediction(inputs, st.session_state.prediction, st.session_state.actual_result)
                 st.session_state.submitted = True  # Mark as submitted
