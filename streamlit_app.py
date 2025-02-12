@@ -6,7 +6,7 @@ import random
 import joblib
 
 # Load the model saved in .sav format
-model = joblib.load("xgboost_model.sav")
+model = joblib.load("xgboost_model_fixed.sav")
 
 try:
     firestore_credentials = st.secrets["gcp_service_account"]
