@@ -37,13 +37,29 @@ all_parameters = {
 }
 
 # Function to log predictions
-def log_prediction(inputs, prediction):
-    log_data = {
-        "features": inputs,
-        "prediction": prediction,
-        "timestamp": firestore.SERVER_TIMESTAMP
-    }
-    db.collection("logs").add(log_data)  # Store in Firestore
+def log_prediction(inputs, prediction, actual_result):
+    try:
+        print("Inputs:", inputs)
+        print("Prediction:", prediction)
+        print("Actual Result:", actual_result)
+
+        # Ensure inputs is JSON-serializable
+        try:
+            json.dumps(inputs)
+        except TypeError as e:
+            st.error(f"Inputs is not JSON-serializable: {e}")
+            return
+
+        log_data = {
+            "features": inputs,
+            "prediction": prediction,
+            "actual_result": actual_result,
+            "timestamp": firestore.SERVER_TIMESTAMP
+        }
+        db.collection("logs").add(log_data)  # Store in Firestore
+        st.success("Results logged successfully!")
+    except Exception as e:
+        st.error(f"Failed to log results: {e}")
 
 # Finished predict function
 def predict_cost(features):
@@ -144,16 +160,8 @@ if st.session_state.show_results:
     else:
         if st.button("Submit Results"):
             if "prediction" in st.session_state and "actual_result" in st.session_state:
-                if not isinstance(inputs, dict):
-                    st.error("Inputs must be a dictionary.")
-                # Ensure prediction is a numeric value
-                if not isinstance(st.session_state.prediction, (int, float)):
-                    st.error("Prediction must be a numeric value.")
-                # Ensure actual_result is a numeric value
-                if not isinstance(st.session_state.actual_result, (int, float)):
-                    st.error("Actual result must be a numeric value.")
                 # Log the prediction and actual result to Firestore
-                log_prediction(inputs, st.session_state.prediction, st.session_state.actual_result)
+                log_prediction(inputs, st.session_state.prediction, float(st.session_state.actual_result))
                 st.session_state.submitted = True  # Mark as submitted
             else:
                 st.error("Please evaluate the model and enter the actual result before submitting.")
