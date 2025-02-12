@@ -115,11 +115,10 @@ if st.button("Use Actual Data"):
     actual_data = use_actual_data()
     inputs = update_inputs_from_actual_data(inputs, actual_data)
     json_display.json(inputs)
-    st.experimental_rerun()
+    st.rerun()
 
 # Button to evaluate the model with the entered inputs
 if st.button("Evaluate Model"):
-    pass
     prediction = predict_cost(inputs)
     st.write("### Prediction:", prediction)
     log_prediction(inputs, prediction)
