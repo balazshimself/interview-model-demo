@@ -15,7 +15,28 @@ def log_prediction(inputs, prediction):
     }
     db.collection("logs").add(log_data)  # Store in Firestore
 
-st.title("My new app")
+st.title("Test my model remotely!")
 st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+    "Input the required data, start execution and give feedback!"
 )
+
+# Define parameters
+parameters = [
+    'Dedicated team members', 'Team size', 'Object points',
+    'Actual duration', 'Estimated duration', 'Degree of risk management',
+    'Economic instability impact', 'Development environment adequacy',
+    'Estimated size', 'Other sizing method', 'Comments within the code',
+    'Application domain', 'Income satisfaction',
+    'Top management opinion of previous system', 'Requirment stability'
+]
+
+st.title("Project Parameters Input")
+
+# Create input fields for each parameter
+inputs = {}
+for param in parameters:
+    inputs[param] = st.number_input(f"{param}", min_value=0, step=1, format="%d")
+
+# Display collected inputs
+st.write("### Entered Values:")
+st.json(inputs)
