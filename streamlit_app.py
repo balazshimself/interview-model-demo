@@ -58,6 +58,33 @@ def use_actual_data():
     filtered_data = {key: value for key, value in row_dict.items() if key in expected_keys}
     return filtered_data
 
+def update_inputs_from_actual_data(inputs, actual_data):
+    for key in expected_keys:
+        if key in actual_data:
+            value = actual_data[key]
+            if pd.notnull(value):
+                if key in int_parameters:
+                    try:
+                        new_val = int(value)
+                    except (ValueError, TypeError):
+                        continue
+                elif key in float_parameters_by_half or key in float_parameters_by_hundredth:
+                    try:
+                        new_val = float(value)
+                    except (ValueError, TypeError):
+                        continue
+                elif key in bool_parameters:
+                    if isinstance(value, bool):
+                        new_val = value
+                    elif isinstance(value, str):
+                        new_val = value.strip().lower() in ['true', '1', 'yes']
+                    else:
+                        new_val = bool(value)
+                # Update the inputs dictionary.
+                inputs[key] = new_val
+                st.session_state[key] = new_val
+    return inputs
+
 st.title("Test My Model Remotely!")
 st.write("Input the required data, start execution, and give feedback!")
 st.header("Project Parameters Input")
@@ -78,23 +105,16 @@ for param in bool_parameters:
 json_display = st.empty()
 json_display.json(inputs)
 
-# Button to evaluate the model with the entered inputs
-if st.button("Evaluate Model"):
-    prediction = predict_cost(inputs)
-    st.write("### Prediction:", prediction)
-    log_prediction(inputs, prediction)
-
 # Optional: Button to load actual data from an Excel file.
 # This updates the same JSON display with values from a random row.
 if st.button("Use Actual Data"):
     actual_data = use_actual_data()
-    # Update the inputs dictionary (assuming Excel column names match your parameter names)
-    inputs.update(actual_data)
-    json_display.json(inputs)  # Update the displayed JSON with the new values
-    st.write("### Actual data loaded from Excel.")
+    inputs = update_inputs_from_actual_data(inputs, actual_data)
+    json_display.json(inputs)
 
 # Button to evaluate the model with the entered inputs
 if st.button("Evaluate Model"):
+    pass
     prediction = predict_cost(inputs)
     st.write("### Prediction:", prediction)
     log_prediction(inputs, prediction)
