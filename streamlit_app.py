@@ -113,8 +113,25 @@ if st.button("Use Actual Data"):
     json_display.json(inputs)
     st.rerun()
 
-# Button to evaluate the model with the entered inputs
 if st.button("Evaluate Model"):
     prediction = predict_cost(inputs)
     st.write("### Prediction:", prediction)
-    # log_prediction(inputs, prediction)
+
+    # Store the prediction in session state
+    st.session_state.prediction = prediction
+
+    # Show a number input for the actual result
+    st.session_state.actual_result = st.number_input(
+        "Enter the actual result:",
+        value=0.0,
+        step=0.1,
+        format="%.2f"
+    )
+
+    # Show a button to submit the results
+    if st.button("Submit Results"):
+        if "prediction" in st.session_state and "actual_result" in st.session_state:
+            # Log the prediction and actual result to Firestore
+            log_prediction(inputs, st.session_state.prediction, st.session_state.actual_result)
+        else:
+            st.error("Please evaluate the model and enter the actual result before submitting.")
