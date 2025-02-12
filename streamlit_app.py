@@ -7,6 +7,28 @@ import random
 # Load Firestore credentials from Streamlit secrets
 firestore_credentials = st.secrets["gcp_service_account"]
 db = firestore.Client.from_service_account_info(firestore_credentials)
+df = pd.read_excel('SEERA_dataset.xlsx')
+
+# Define parameters
+int_parameters = [
+    'Dedicated team members', 'Team size', 'Object points', 'Degree of risk management',
+    'Economic instability impact', 'Development environment adequacy',
+    'Estimated size', 'Other sizing method', 'Comments within the code',
+    'Application domain', 'Income satisfaction'
+]
+
+float_parameters_by_half = [
+    'Actual duration', 'Estimated duration'
+]
+
+float_parameters_by_hundredth = [
+    'Requirement stability'
+]
+
+bool_parameters = [
+    'Top management opinion of previous system'
+]
+expected_keys = int_parameters + float_parameters_by_half + float_parameters_by_hundredth + bool_parameters
 
 # Function to log predictions
 def log_prediction(inputs, prediction):
@@ -31,34 +53,13 @@ def predict_cost(features):
 # Function to load a random row from an Excel file
 def use_actual_data():
     # Make sure the Excel file is accessible by your app (adjust the path as needed)
-    df = pd.read_excel('SEERA_dataset.xlsx')
-    random_row = df.sample(n=1)
-    # Convert the selected row to a dictionary (assumes column names match your parameters)
-    return random_row.to_dict(orient='records')[0]
+    row_dict = df.sample(n=1).to_dict(orient='records')[0]
+
+    filtered_data = {key: value for key, value in row_dict.items() if key in expected_keys}
+    return filtered_data
 
 st.title("Test My Model Remotely!")
 st.write("Input the required data, start execution, and give feedback!")
-
-# Define parameters
-int_parameters = [
-    'Dedicated team members', 'Team size', 'Object points', 'Degree of risk management',
-    'Economic instability impact', 'Development environment adequacy',
-    'Estimated size', 'Other sizing method', 'Comments within the code',
-    'Application domain', 'Income satisfaction'
-]
-
-float_parameters_by_half = [
-    'Actual duration', 'Estimated duration'
-]
-
-float_parameters_by_hundredth = [
-    'Requirement stability'
-]
-
-bool_parameters = [
-    'Top management opinion of previous system'
-]
-
 st.header("Project Parameters Input")
 
 # Create input fields for each parameter
@@ -91,3 +92,9 @@ if st.button("Use Actual Data"):
     inputs.update(actual_data)
     json_display.json(inputs)  # Update the displayed JSON with the new values
     st.write("### Actual data loaded from Excel.")
+
+# Button to evaluate the model with the entered inputs
+if st.button("Evaluate Model"):
+    prediction = predict_cost(inputs)
+    st.write("### Prediction:", prediction)
+    log_prediction(inputs, prediction)
