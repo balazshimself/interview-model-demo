@@ -3,7 +3,7 @@ import streamlit as st
 from google.cloud import firestore
 
 # Load Firestore credentials from Streamlit secrets
-firestore_credentials = json.loads(st.secrets["gcp_service_account"])
+firestore_credentials = st.secrets["gcp_service_account"]
 db = firestore.Client.from_service_account_info(firestore_credentials)
 
 # Function to log predictions
