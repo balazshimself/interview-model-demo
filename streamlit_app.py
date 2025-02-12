@@ -80,6 +80,12 @@ st.header("Project Parameters Input")
 if 'inputs' not in st.session_state:
     st.session_state.inputs = {}
 
+if 'show_results' not in st.session_state:
+    st.session_state.show_results = False
+
+if 'submitted' not in st.session_state:
+    st.session_state.submitted = False
+
 # Create input fields dynamically
 inputs = {}
 for param, config in all_parameters.items():
@@ -113,14 +119,18 @@ if st.button("Use Actual Data"):
     json_display.json(inputs)
     st.rerun()
 
+# Button to evaluate the model with the entered inputs
 if st.button("Evaluate Model"):
     prediction = predict_cost(inputs)
     st.write("### Prediction:", prediction)
 
     # Store the prediction in session state
     st.session_state.prediction = prediction
+    st.session_state.show_results = True  # Show the numeric field and submit button
+    st.session_state.submitted = False  # Reset submission status
 
-    # Show a number input for the actual result
+# Show the numeric field and submit button if the model has been evaluated
+if st.session_state.show_results:
     st.session_state.actual_result = st.number_input(
         "Enter the actual result:",
         value=0.0,
@@ -128,10 +138,14 @@ if st.button("Evaluate Model"):
         format="%.2f"
     )
 
-    # Show a button to submit the results
-    if st.button("Submit Results"):
-        if "prediction" in st.session_state and "actual_result" in st.session_state:
-            # Log the prediction and actual result to Firestore
-            log_prediction(inputs, st.session_state.prediction, st.session_state.actual_result)
-        else:
-            st.error("Please evaluate the model and enter the actual result before submitting.")
+    # Disable the submit button if there's no new data to submit
+    if st.session_state.submitted:
+        st.warning("Results already submitted. Re-evaluate the model to submit new results.")
+    else:
+        if st.button("Submit Results"):
+            if "prediction" in st.session_state and "actual_result" in st.session_state:
+                # Log the prediction and actual result to Firestore
+                log_prediction(inputs, st.session_state.prediction, st.session_state.actual_result)
+                st.session_state.submitted = True  # Mark as submitted
+            else:
+                st.error("Please evaluate the model and enter the actual result before submitting.")
