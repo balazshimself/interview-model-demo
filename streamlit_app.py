@@ -78,13 +78,22 @@ if 'inputs' not in st.session_state:
 # Create input fields dynamically
 inputs = {}
 for param, config in all_parameters.items():
+    # Ensure min_value, max_value, and step are within JavaScript's safe range
+    min_value = float(config["min_value"])
+    max_value = float(config.get("max_value", float("inf")))
+    step = float(config["step"])
+
+    # Clamp min_value and max_value to JavaScript's safe range
+    min_value = max(min_value, -1e15)  # Minimum safe value
+    max_value = min(max_value, 1e15)   # Maximum safe value
+
     inputs[param] = st.number_input(
         param,
-        min_value=float(config["min_value"]),  # Ensure min_value is a float
-        max_value=float(config.get("max_value", float("inf"))),  # Ensure max_value is a float
-        step=float(config["step"]),  # Ensure step is a float
+        min_value=min_value,
+        max_value=max_value,
+        step=step,
         format=config["format"],
-        value=float(st.session_state.inputs.get(param, config["min_value"]))  # Ensure value is a float
+        value=float(st.session_state.inputs.get(param, min_value))  # Ensure value is a float
     )
 
 # Create a container for displaying the updated JSON.
